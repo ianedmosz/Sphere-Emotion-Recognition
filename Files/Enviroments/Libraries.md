@@ -95,3 +95,54 @@ wheel==0.36.2
 zipp==3.5.0
 zlib==1.2.11
 zstd==1.4.9
+m2w64-gcc-libgfortran==5.3.0
+m2w64-gcc-libs==5.3.0
+m2w64-gcc-libs-core==5.3.0
+m2w64-gmp==6.1.0
+m2w64-libwinpthread-git==5.0.0.4634.697f757
+msys2-conda-epoch==20160418
+olefile==0.46
+openssl==1.1.1w
+pandoc==2.19.2
+qt==5.9.7
+sip==4.19.13
+tk==8.6.10
+vc==14.2
+vs2015_runtime==14.27.29016
+xz==5.2.5
+zeromq==4.3.3
+zlib==1.2.11
+zstd==1.4.9 
+
+```
+
+## **Pip Dependencies**
+
+The following dependencies are installed via `pip`:
+
+```plaintext
+brainflow==5.15.0
+joblib==1.4.2
+pyeeg==0.4.4
+pyserial==3.5
+python-osc==1.8.3
+scikit-learn==1.3.1
+scipy==1.10.1
+threadpoolctl==3.5.0
+
+```
+
+## **How to Use This Configuration**
+
+1. **Recreate the environment:** Use the provided `environment.yml` file or install dependencies manually:
+   ```bash
+   conda env create -f environment.yml
+2. ** Activate the environment:** 
+```bash
+conda activate NeuroEmociones
+```
+3. **Install pip dependencies:** 
+```bash
+pip install brainflow==5.15.0 joblib==1.4.2 pyeeg==0.4.4 pyserial==3.5 python-osc==1.8.3 scikit-learn==1.3.1 scipy==1.10.1 threadpoolctl==3.5.0
+```
+
