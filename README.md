@@ -16,7 +16,7 @@ All of the main configuration of the functioning of the code will be on the Vari
 Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnológico de Monterrey.
 
 - **Contact**: [neurohumanidades@tec.mx](mailto:neurohumanidades@tec.mx)
-- **Git Hub**: [Laboratorio de Neurohumanidades](https://github.com/Neurohumanities-Lab)
+- **Git Hub**: [Neurohumanities Lab](https://github.com/Neurohumanities-Lab)
 - **BRAIN Center**: [Building Reliable Advances and Innovations in Neurotechnology](https://nsfbrain.org/)
 
 ## **Top Contributors**
