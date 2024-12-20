@@ -1,13 +1,19 @@
-Libraries and Environment Configuration
-This document outlines the libraries and dependencies used in the NeuroEmociones environment for the Sphere-Emotion-Recognition project.
+# **Libraries and Environment Configuration**
 
-Python Version
-Python 3.8.10
+This document outlines the libraries and dependencies used in the `NeuroEmociones` environment for the **Sphere-Emotion-Recognition** project.
 
+---
 
-Conda Dependencies
-The following dependencies are managed via Conda:
+## **Python Version**
+- **Python 3.8.10**
 
+---
+
+## **Conda Dependencies**
+
+The following dependencies are managed via **Conda**:
+
+```plaintext
 argon2-cffi==20.1.0
 async_generator==1.10
 attrs==21.2.0
@@ -89,17 +95,3 @@ wheel==0.36.2
 zipp==3.5.0
 zlib==1.2.11
 zstd==1.4.9
-
-
-Pip Dependencies
-The following dependencies are installed via pip:
-
-brainflow==5.15.0
-joblib==1.4.2
-pyeeg==0.4.4
-pyserial==3.5
-python-osc==1.8.3
-scikit-learn==1.3.1
-scipy==1.10.1
-threadpoolctl==3.5.0
-
