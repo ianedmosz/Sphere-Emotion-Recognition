@@ -19,12 +19,14 @@ Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnol√
 - **Web Site**: [Laboratorio de Neurohumanidades](https://www.tec.mx/es/neurohumanidades)
 - **BRAIN Center**: [Building Reliable Advances and Innovations in Neurotechnology](https://nsfbrain.org/)
 
-
 ## **Top Contributors**
 
-<a href="https://github.com/your_repo/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=your_repo" alt="Contributors" />
+<a href="https://github.com/ianedmosz/Sphere-Emotion-Recognition/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ianedmosz/Sphere-Emotion-Recognition" alt="Contributors" />
 </a>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 | Name                               | Role                                   | Contact                                   |
 |------------------------------------|---------------------------------------|-------------------------------------------|
