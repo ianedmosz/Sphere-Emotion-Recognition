@@ -137,7 +137,7 @@ threadpoolctl==3.5.0
 1. **Recreate the environment:** Use the provided `environment.yml` file or install dependencies manually:
    ```bash
    conda env create -f environment.yml
-2. ** Activate the environment:** 
+2. **Activate the environment:** 
 ```bash
 conda activate NeuroEmociones
 ```
