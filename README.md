@@ -21,7 +21,6 @@ Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnol√
 - **Proyect Presentation:** [Engaging Experiences for Human Flourishing](https://sway.cloud.microsoft/OPIQZJ5peGHC6QmD?ref=Link)
 
 ## **Top Contributors**
-
 <a href="https://github.com/ianedmosz/Sphere-Emotion-Recognition/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=ianedmosz/Sphere-Emotion-Recognition" alt="Contributors" />
 </a>
