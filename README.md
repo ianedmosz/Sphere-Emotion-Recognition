@@ -15,10 +15,10 @@ All of the main configuration of the functioning of the code will be on the Vari
 
 Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnológico de Monterrey.
 
-- **Contact**: [neurohumanidades@tec.mx](mailto:neurohumanidades@tec.mx)
-- **Git Hub**: [Neurohumanities Lab](https://github.com/Neurohumanities-Lab)
+- **Contact**: [manuel.cebral@tec.mx](mailto:manuel.cebral@tec.mx)
+- **Git Hub**: [Neurohumanities Lab](https://github.com/neurohumanities-lab)
 - **BRAIN Center**: [Building Reliable Advances and Innovations in Neurotechnology](https://nsfbrain.org/)
-- **Proyect Presentation:** [Engaging Experiences for Human Flourishing](https://sway.cloud.microsoft/OPIQZJ5peGHC6QmD?ref=Link)
+- **Project Presentation:** [Engaging Experiences for Human Flourishing](https://sway.cloud.microsoft/OPIQZJ5peGHC6QmD?ref=Link)
 
 ## **Top Contributors**
 <a href="https://github.com/ianedmosz/Sphere-Emotion-Recognition/graphs/contributors">
@@ -30,14 +30,14 @@ Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnol�
 
 | Name                               | Role                                   | Contact                                   |
 |------------------------------------|---------------------------------------|-------------------------------------------|
-| **Milton O. Candela-Leal**         | Researcher                            | [milton.candela@tec.mx](mailto:milton.candela@tec.mx) |
-| **Dr. Armando Martínez-Hernández** | Principal Investigator                | [armando.martinez@tec.mx](mailto:armando.martinez@tec.mx) |
-| **Ian E. Moreno-Salazar**          | Research Assistant                    | [ian.moreno@tec.mx](mailto:ian.moreno@tec.mx) |
-| **José E. Calderón-Gurubel**       | Researcher                            | [jose.calderon@tec.mx](mailto:jose.calderon@tec.mx) |
-| **Alexandro A. Ortiz-Espinoza**    | Researcher                            | [alexandro.ortiz@tec.mx](mailto:alexandro.ortiz@tec.mx) |
-| **Carol S. Vélez-Saboyá**          | Research Assistant                    | [carol.velez@tec.mx](mailto:carol.velez@tec.mx) |
-| **Jorge de-J. Lozoya-Santos**      | Researcher                            | [jorge.lozoya@tec.mx](mailto:jorge.lozoya@tec.mx) |
-| **Manuel Cebral-Loureda**          | Researcher                            | [manuel.cebral@tec.mx](mailto:manuel.cebral@tec.mx) |
-| **Dr. Mauricio A. Ramírez-Moreno** | Project Supervisor / IEEE Member      | [mauricio.ramirez@tec.mx](mailto:mauricio.ramirez@tec.mx) |
+| **Milton O. Candela-Leal**         | Undergrad Researcher                  | [milton.candela@tec.mx](mailto:milton.candela@tec.mx) |
+| **Armando Martínez-Hernández**     | Undergrad Researcher                  | [A01173839@tec.mx](mailto:A01173839@tec.mx) |
+| **Ian E. Moreno-Salazar**          | Undergrad Researcher                  | [A01178247@tec.mx](mailto:A01178247@tec.mx) |
+| **José E. Calderón-Gurubel**       | Undergrad Researcher                  | [A01411701@tec.mx](mailto:A01411701@tec.mx) |
+| **Dr. Alexandro A. Ortiz-Espinoza**| Postdoctoral Researcher               | [alexandro.ortiz@tec.mx](mailto:alexandro.ortiz@tec.mx) |
+| **Dr. Carol S. Vélez-Saboyá**      | Assistant Research Professor          | [carol.velez@tec.mx](mailto:carol.velez@tec.mx) |
+| **Dr. Jorge de-J. Lozoya-Santos**  | Research Professor                    | [jorge.lozoya@tec.mx](mailto:jorge.lozoya@tec.mx) |
+| **Dr. Manuel Cebral-Loureda**      | Principal Investigator                | [manuel.cebral@tec.mx](mailto:manuel.cebral@tec.mx) |
+| **Dr. Mauricio A. Ramírez-Moreno** | Assistant Research Professor          | [mauricio.ramirez@tec.mx](mailto:mauricio.ramirez@tec.mx) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
