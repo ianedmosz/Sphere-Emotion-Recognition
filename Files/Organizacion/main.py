@@ -3,9 +3,6 @@ from brainflow import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 import time
 from scipy import signal
 import numpy as np
-from scipy.signal import welch, butter, lfilter
-import pickle
-import pyeeg as pe                         
 from statistics import mean
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -30,7 +27,7 @@ from processing.butter import butter_bandpass_filter
 from processing.sphere import get_emotion_sphere, get_fear_sphere
 ########################################################################################
 base_path = Path(__file__).parent
-#Variable a modifica
+#Variable a modificar
 #final_descion=int(input('0 for only emotions; 1 for only fear; 2 for both:'))
 
 
