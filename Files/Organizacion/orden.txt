@@ -1,17 +1,28 @@
 /Sphere-Emotion
 ├── /config             # Configuración y datos de variables
-│   ├── variables.json  # JSON con configuraciones generales
-│   ├── config.py       # Código para cargar las variables
+│   ├── __init__.py     # Inicialización del módulo
+│   ├── configs.py      # Código para cargar las variables
+│   ├── emotions.py     # Código para cargar emociones y Descartes_Passions
+│   ├── Variables.json  # JSON con configuraciones generales
 ├── /models             # Manejo de modelos y predicciones
+│   ├── Aro_RF_10s.pkl  # Modelo para Arousal
+│   ├── Dom_RF_10s.pkl  # Modelo para Dominance
 │   ├── model_loader.py # Código para cargar modelos .pkl
 │   ├── predict.py      # Código para predicciones (cubic, linear)
+│   ├── reg_aro_model.pkl  # Modelo de regresión para Arousal
+│   ├── reg_dom_model.pkl  # Modelo de regresión para Dominance
+│   ├── reg_val_model.pkl  # Modelo de regresión para Valence
+│   ├── Val_RF_10s.pkl  # Modelo para Valence
 ├── /processing         # Procesamiento de señales
-│   ├── filters.py      # Filtros (bandpass, etc.)
-│   ├── features.py     # Cálculo de PSD y otros
+│   ├── __init__.py     # Inicialización del módulo
+│   ├── butter.py       # Filtros (bandpass, etc.)
+│   ├── psd_bands.py    # Cálculo de PSD y otros
+│   ├── sphere.py       # Cálculo de esferas de emociones
 ├── /visualization      # Código relacionado con gráficas
-│   ├── plot.py         # Generación de gráficas en tiempo real
+│   ├── base.py         # Código base para visualización
+│   ├── main.py         # Código principal para visualización
+│   ├── orden.txt       # Archivo con orden de ejecución
 ├── /hardware           # Código relacionado con hardware
 │   ├── arduino.py      # Configuración y control del Arduino
 │   ├── openbci.py      # Configuración del OpenBCI
 ├── main.py             # Código principal que orquesta todo
-
