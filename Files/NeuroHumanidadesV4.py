@@ -13,7 +13,6 @@ from pythonosc import udp_client
 import random   #/usr/lib/jvm/default/bin:/
 import warnings
 import serial
-import math
 from sklearn.exceptions import DataConversionWarning
 import datetime
 import os
@@ -26,9 +25,10 @@ import datetime
 #Variable a modificar
 base_path = Path(__file__).parent
 #final_descion=int(input('0 for only emotions; 1 for only fear; 2 for both:'))
+variables_path=base_path/'Variables'/'Variables.json'
 
 try:
-    with open(fr"{base_path}\Variables\Variables.json") as f:
+    with open(f"{variables_path}") as f:
         variables = json.load(f)
 except Exception as e:
     print(f"Error al cargar el JSON: {e}")
@@ -40,14 +40,14 @@ evaluation_type = variables['test_parms'].get('evaluation_type', 'both')
 
 try:
     if evaluation_type == 'spherical' or evaluation_type == 'both':
-        Val_Pkl_linear = pickle.load(open(f"{base_path}/reg_val_model.pkl", "rb"))
-        Aro_Pkl_linear = pickle.load(open(f"{base_path}/reg_aro_model.pkl", "rb"))
-        Dom_Pkl_linear = pickle.load(open(f"{base_path}/reg_dom_model.pkl", "rb"))
+        Val_Pkl_linear = pickle.load(open(base_path /"reg_val_model.pkl", "rb"))
+        Aro_Pkl_linear = pickle.load(open(base_path/"reg_aro_model.pkl", "rb"))
+        Dom_Pkl_linear = pickle.load(open(base_path/"reg_dom_model.pkl", "rb"))
 
     if evaluation_type == 'cubic' or evaluation_type == 'both':
-        Val_Pkl_cubic = pickle.load(open(f"{base_path}/Val_RF_10s.pkl", "rb"))
-        Aro_Pkl_cubic = pickle.load(open(f"{base_path}/Aro_RF_10s.pkl", "rb"))
-        Dom_Pkl_cubic = pickle.load(open(f"{base_path}/Dom_RF_10s.pkl", "rb"))
+        Val_Pkl_cubic = pickle.load(open(base_path/"Val_RF_10s.pkl", "rb"))
+        Aro_Pkl_cubic = pickle.load(open(base_path/"Aro_RF_10s.pkl", "rb"))
+        Dom_Pkl_cubic = pickle.load(open(base_path/"Dom_RF_10s.pkl", "rb"))
 
 except FileNotFoundError as e:
     print(f"Error: {e}")

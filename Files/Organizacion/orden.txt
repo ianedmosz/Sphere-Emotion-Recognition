@@ -1,0 +1,17 @@
+/Sphere-Emotion
+├── /config             # Configuración y datos de variables
+│   ├── variables.json  # JSON con configuraciones generales
+│   ├── config.py       # Código para cargar las variables
+├── /models             # Manejo de modelos y predicciones
+│   ├── model_loader.py # Código para cargar modelos .pkl
+│   ├── predict.py      # Código para predicciones (cubic, linear)
+├── /processing         # Procesamiento de señales
+│   ├── filters.py      # Filtros (bandpass, etc.)
+│   ├── features.py     # Cálculo de PSD y otros
+├── /visualization      # Código relacionado con gráficas
+│   ├── plot.py         # Generación de gráficas en tiempo real
+├── /hardware           # Código relacionado con hardware
+│   ├── arduino.py      # Configuración y control del Arduino
+│   ├── openbci.py      # Configuración del OpenBCI
+├── main.py             # Código principal que orquesta todo
+
