@@ -1,4 +1,4 @@
-def emocion(arousal, dominance, valence, emotions, emotions_fear):
+def emocion(final_descion,arousal, dominance, valence, emotions, emotions_fear):
     valence_1 = int(valence - 1)
     arousal_1 = int(arousal - 1)
     dominance_1 = int(dominance - 1)
