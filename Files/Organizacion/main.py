@@ -147,6 +147,7 @@ def classify_fearm_metric(fear_metric):
     index = np.digitize(fear_metric, bins, right=True) - 1
     return labels[index]
 
+spherical_emotion = "Unknown"
 
 try:  
     while iteraciones < 2000:
@@ -365,7 +366,7 @@ try:
         #Definicion de cuales funciones se mandan a llamar en base al modelo linear o cubico
         
         if evaluation_type in ['cubic', 'both']:
-            cubic_emotion = emocion(vale, arou, domi, emotions, emotions_fear)
+            cubic_emotion = emocion(final_descion,vale, arou, domi, emotions, emotions_fear)
             print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
 
             if final_descion == 0:  # Solo emociones
@@ -373,7 +374,7 @@ try:
             elif final_descion == 1:  # Solo miedo
                 print(f"Cubic Fear: {cubic_emotion.replace('Fear', '').strip()}")
             elif final_descion == 2:  # Ambos
-                cubic_emotion = emocion(vale_cubic, arou_cubic, domi_cubic, emotions, emotions_fear)
+                cubic_emotion = emocion(final_descion,vale_cubic, arou_cubic, domi_cubic, emotions, emotions_fear)
                 emotion_value, fear_value = cubic_emotion
                 print(f"Cubic Emotion: {emotion_value}, Fear: {fear_value.replace('Fear', '').strip()}")
 
@@ -437,7 +438,7 @@ try:
                 ]
 
 
-        emociones = emocion(arou, domi, vale,emotions,emotions_fear) #Aqui no se 
+        emociones = emocion(final_descion,arou, domi, vale,emotions,emotions_fear) #Aqui no se 
         realemotion = real_emotion(spherical_emotion)  # ID categórico de la emoción
 
         def send_scaled_metric(client, address, metric):
