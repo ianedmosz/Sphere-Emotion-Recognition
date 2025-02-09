@@ -1,0 +1,5 @@
+1. OSC servers específicos
+2. Gráfica en tiempo real
+3. Código de python a exe
+4. Conectividad neuronal (intra-sujeto) / Bispectrum (inter-sujeto)
+5. Mejorar y agregar info al Git-Hub
