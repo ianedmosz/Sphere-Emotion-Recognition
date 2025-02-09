@@ -1,4 +1,5 @@
-import pandas as pd
+import pandas as pd 
+import numpy as np
 import time
 from scipy import signal
 import numpy as np
@@ -462,9 +463,12 @@ try:
 
         client5.send_message(address_emotion, spherical_emotion)
         client5.send_message(address_emotion_id, realemotion)
+            
 
+        #Creo que address emotion es el que manda el valor real-emotion
         if evaluation_type in ['spherical', 'both']:
             send_scaled_metric(client3, address_similarity, temp)
+        
         if final_descion in [1, 2]:
             send_scaled_metric(client3, address_similarity, fear_metric)
         
