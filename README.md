@@ -15,7 +15,7 @@ All of the main configuration of the functioning of the code will be on the Vari
   <img src="https://github.com/user-attachments/assets/fe096b51-9508-4371-8810-c7c27788a4f7" alt="sphere" width="400">
 </p>
 
-<h3>Sphere vs Cube Predictions</h3>
+<h3>Sphere vs Cube Predictions:</h3>
 
   <img src="https://github.com/user-attachments/assets/2de0b23b-2178-4435-becf-51befe7dbd7d" alt="sphere_vs_cube" width="400">
 </p>
