@@ -6,7 +6,7 @@
 
 This project focuses on the real-time recognition of emotions and fear using EEG signals. The system leverages machine learning models to classify emotions (Valence, Arousal, and Dominance) and utilizes spherical and cubic mappings to provide enhanced emotion metrics. The project also integrates Arduino and OSC protocols for data transmission and hardware communication.
 
-Brain Sphere Emotion Recognition
+### **Brain Sphere Emotion Recognition**
 
 All of the main configuration of the functioning of the code will be on the Variable folders. The Valence Arousal And Dominance (VAD values, for the plotting for each emotion can be found on the Emotion Folder.
 
