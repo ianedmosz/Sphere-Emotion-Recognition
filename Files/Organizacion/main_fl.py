@@ -532,6 +532,55 @@ except KeyboardInterrupt:
 
     combined_table = pd.DataFrame()
 
+        # Evaluación cúbica
+    if evaluation_type in ['cubic', 'both'] and os.path.exists(cubic_path):
+        table_cubic = load_table(cubic_path)
+        if final_descion == 0:
+            combined_table = table_cubic
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_cubic], ignore_index=True)
+
+        # Evaluación esférica
+    if evaluation_type in ['spherical', 'both'] and os.path.exists(spherical_path):
+        table_spherical = load_table(spherical_path)
+        if final_descion == 1:
+            combined_table = table_spherical
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_spherical], ignore_index=True)
+
+    if evaluation_type in ['spherical', 'both'] and os.path.exists(fear_spherical_path):
+        table_fear = load_table(fear_spherical_path)
+        if final_descion == 1:
+            combined_table = table_fear
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_fear], ignore_index=True)
+
+        # Mostrar últimas filas de las combinaciones
+    if not combined_table.empty:
+        print(f"Last rows of combined data:\n{combined_table.tail(20)}")
+
+        # Estilizar y guardar tabla como HTML
+        num_columns = ['Timestamp', 'Engagement', 'Valence', 'Arousal', 'Dominance']
+        styled_table = (
+            combined_table.style
+            .format({col: "{:.2f}" for col in num_columns if col in combined_table.columns})
+            .highlight_max(subset=['Engagement'], axis=0, color='pink')
+            .highlight_min(subset=['Engagement'], axis=0, color='blue')
+        )
+
+            # Guardar la tabla estilizada
+        with open(styled_table_path, 'w') as f:
+            f.write(styled_table.render())
+            print(f"Styled table saved to {styled_table_path}")
+    else:
+        print("No combined data available to display or save.")
+
+        # Mostrar datos almacenados
+        print(f'Emotions:\n{df_emotions}')
+        print(f'Fear:\n{df_fear}')
+
+    board.stop_stream()
+    board.release_session()
 
 except Exception as e:
     print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
