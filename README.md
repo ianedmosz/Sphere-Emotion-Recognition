@@ -6,10 +6,19 @@
 
 This project focuses on the real-time recognition of emotions and fear using EEG signals. The system leverages machine learning models to classify emotions (Valence, Arousal, and Dominance) and utilizes spherical and cubic mappings to provide enhanced emotion metrics. The project also integrates Arduino and OSC protocols for data transmission and hardware communication.
 
-Brain Sphere Emotion Recognition
+### **Brain Sphere Emotion Recognition**
 
 All of the main configuration of the functioning of the code will be on the Variable folders. The Valence Arousal And Dominance (VAD values, for the plotting for each emotion can be found on the Emotion Folder.
 
+<h3>Sphere For Emotion Recognition:</h3>
+
+  <img src="https://github.com/user-attachments/assets/fe096b51-9508-4371-8810-c7c27788a4f7" alt="sphere" width="400">
+</p>
+
+<h3>Sphere vs Cube Predictions:</h3>
+
+  <img src="https://github.com/user-attachments/assets/2de0b23b-2178-4435-becf-51befe7dbd7d" alt="sphere_vs_cube" width="400">
+</p>
 
 ## **Meta**
 
@@ -19,6 +28,7 @@ Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnol√
 - **Git Hub**: [Neurohumanities Lab](https://github.com/neurohumanities-lab)
 - **BRAIN Center**: [Building Reliable Advances and Innovations in Neurotechnology](https://nsfbrain.org/)
 - **Project Presentation:** [Engaging Experiences for Human Flourishing](https://sway.cloud.microsoft/OPIQZJ5peGHC6QmD?ref=Link)
+- **Papers:** [Real-time EEG-based emotion recognition for neurohumanities: perspectives from principal component analysis and tree-based algorithms](https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2024.1319574/full)
 
 ## **Top Contributors**
 <a href="https://github.com/ianedmosz/Sphere-Emotion-Recognition/graphs/contributors">
