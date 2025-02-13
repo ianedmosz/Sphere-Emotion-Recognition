@@ -93,10 +93,6 @@ evaluation_type = variables['test_parms'].get('evaluation_type', 'both')
 
 
 ###############################################################################
-
-
-
-
 # 1. Sí Arduino, Sí Sintético
 if arduino_bol and synthetic_bol:
     print("Using both Arduino and Synthetic data.")

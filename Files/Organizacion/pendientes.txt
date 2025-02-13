@@ -1,5 +1,20 @@
-1. OSC servers específicos
-2. Gráfica en tiempo real
-3. Código de python a exe
-4. Conectividad neuronal (intra-sujeto) / Bispectrum (inter-sujeto)
-5. Mejorar y agregar info al Git-Hub
+Mejorar el manejo y modularidad de los OSC servers. ​
+
+Gráfica en tiempo real.​
+
+Mejorar el performance del codigo si es necesario. ​
+
+Nueva Version aun mas organizada del codigo.​
+
+Código de python a exe. ​
+
+Unificacion de codigos con los codigos de la Empatica.​
+
+Comenzar con la Conectividad neuronal (intra-sujeto) / Bispectrum (inter-sujeto). Y el uso de dos OpenBci al mismo tiempo.​
+
+Terminar y mandar a revision El paper del nuevo modelo esférico. ​
+
+Terminar el git del proyecto. ​
+
+Análisis de conectividad neuronal mediante teoría de grafos para poder identificar qué canales y bandas de frecuencia están más relacionadas con diferentes emociones. 
+Para trazar una ruta neuronal y reducir el numero de canales.​
