@@ -27,7 +27,10 @@ from hardware.board import setup_board
 from hardware.arduino import setup_arduino
 from config.emocion import emocion
 from config.real_emotion import real_emotion
+import cProfile
+import pstats
 ########################################################################################
+
 base_path = Path(__file__).parent
 #Variable a modificar
 #final_descion=int(input('0 for only emotions; 1 for only fear; 2 for both:'))
@@ -145,7 +148,11 @@ def classify_fearm_metric(fear_metric):
 
 spherical_emotion = "Unknown"
 
-try:  
+profiler = cProfile.Profile()
+profile_path=os.path.join(lodb,folder,"perfomance.prof")
+
+try:
+    profiler.enable()
     while iteraciones < 2000:
 
      # Create empty lists to store the streamed data for each channel
@@ -537,6 +544,10 @@ except Exception as e:
     print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
 
 finally:
-    # Detener la sesión de la placa
-    print(Fore.GREEN + 'Data stored successfully.' + Style.RESET_ALL)
+    profiler.disable()  # Asegurar que el perfilador se desactiva siempre
+    profiler.dump_stats(profile_path)  # Guardar el perfilado en la carpeta del sujeto
+    print(Fore.GREEN + f"Performance profile saved to: {profile_path}" + Style.RESET_ALL)
 
+    # Analizar y mostrar las funciones más lentas
+    stats = pstats.Stats(profile_path)
+    stats.strip_dirs().sort_stats("cumulative").print_stats(10) 
