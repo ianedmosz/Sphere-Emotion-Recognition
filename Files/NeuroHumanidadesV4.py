@@ -21,7 +21,12 @@ import json
 from serial import Serial
 from pathlib import Path
 import datetime
+import cProfile
+import pstats
 ########################################################################################
+
+
+
 #Variable a modificar
 base_path = Path(__file__).parent
 #final_descion=int(input('0 for only emotions; 1 for only fear; 2 for both:'))
@@ -386,6 +391,8 @@ def classify_fearm_metric(fear_metric):
     index = np.digitize(fear_metric, bins, right=True) - 1
     return labels[index]
 
+profiler = cProfile.Profile()
+profiler.enable()
 
 try:  
     while iteraciones < 2000:
@@ -830,3 +837,8 @@ except Exception as e:
 finally:
     # Detener la sesión de la placa
     print(Fore.GREEN + 'Data stored successfully.' + Style.RESET_ALL)
+
+profiler.disable()
+profiler.dump_stats("perfomance.prof")
+stats=pstats.Stats("perfomance.prof")
+stats.strip_dirs().sort_stats("cumlative").print_stats(10)
