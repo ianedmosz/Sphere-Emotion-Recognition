@@ -143,7 +143,12 @@ conda activate NeuroEmociones.yml
 ```
 3. **Install pip dependencies:** 
 ```bash
-pip install brainflow==5.15.0 joblib==1.4.2 pyeeg==0.4.4 pyserial==3.5 python-osc==1.8.3 scikit-learn==1.3.1 scipy==1.10.1 threadpoolctl==3.5.0 git+https://github.com/forrestbao/pyeeg.git
+pip install brainflow==5.15.0 joblib==1.4.2  pyserial==3.5 python-osc==1.8.3 scikit-learn==1.3.1 scipy==1.10.1 threadpoolctl==3.5.0 git+https://github.com/forrestbao/pyeeg.git
+
+```
+4. **Install pyeeg:** 
+```bash
+pip install git+https://github.com/forrestbao/pyeeg.git
 
 ```
 
