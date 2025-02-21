@@ -1,5 +1,5 @@
-import pandas as pd 
-import numpy as np
+import pandas as pd
+from brainflow import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 import time
 from scipy import signal
 import numpy as np
@@ -15,6 +15,8 @@ from sklearn.exceptions import DataConversionWarning
 import datetime
 import os
 from colorama import Fore, Style
+import json
+from serial import Serial
 from pathlib import Path
 import datetime
 from models.model_loader import load_models
@@ -23,10 +25,6 @@ from config.emotions import load_emotions
 from processing.psd_bands import compute_psd_bands
 from processing.butter import butter_bandpass_filter
 from processing.sphere import get_emotion_sphere, get_fear_sphere
-from hardware.board import setup_board
-from hardware.arduino import setup_arduino
-from config.emocion import emocion
-from config.real_emotion import real_emotion
 ########################################################################################
 base_path = Path(__file__).parent
 #Variable a modificar
@@ -86,12 +84,118 @@ duration = variables['test_parms']["duration"] # queremos 10 segundos
 sampling_rate =variables['test_parms']['sampling_rate'] # used to be 128, queremos 250 Hz
 
 #channels = (0, 1, 2, 3, 4, 5, 6, 7)  # Streaming data from channels 0 to 7
-channels = list(range(9))   # Streaming data from channels 0 to 7\n",#Path para dicionarios de emociones
+channels = list(range(9))   # Streaming data from channels 0 to 7\n",
+#Path para dicionarios de emociones
 
 evaluation_type = variables['test_parms'].get('evaluation_type', 'both')
 
 
 ###############################################################################
+
+def emocion(arousal, dominance, valence, emotions, emotions_fear):
+    valence_1 = int(valence - 1)
+    arousal_1 = int(arousal - 1)
+    dominance_1 = int(dominance - 1)
+    
+    # Create the key and ensure it's formatted as a string
+    key = str([arousal_1, dominance_1, valence_1])
+    
+    if final_descion == 0:  # Only emotions
+        return emotions.get(key, 'Unknown')
+    elif final_descion == 1:  # Only fear
+        return emotions_fear.get(key, 'Unknown')
+    elif final_descion == 2:  # Both emotions and fear
+        emotion_value = emotions.get(key, 'Unknown')
+        fear_value = emotions_fear.get(key, 'Unknown')
+        return emotion_value, fear_value
+    else:
+        print("error")
+        return None
+
+
+def real_emotion(emo):
+    map_emotions = {"Sadness": "Sadness",
+                    "Rejected": None,
+                    "Pessimistic": None,
+                    "Hate": "Hate",
+                    "Distressed": None, 
+                    "Anxious": None,
+                    "Calm": None,
+                    "Neutral": None,
+                    "Admiration": "Admiration",
+                    "Relief": None,
+                    "Relaxed": None,
+                    "Overconfident": None,
+                    "Satisfied": None,
+                    "Desire": "Desire",
+                    "Love": "Love",
+                    "Joy": "Joy",
+                    "Generosity": None 
+                    }
+    #emo = map_emotions[emo]
+    #Values for the OSC Server and Emotions
+
+    if emo == "Love":
+        return 1
+    elif emo == "Hate":
+        return 2
+    elif emo == "Desire":
+        return 3
+    elif emo == "Admiration":
+        return 4
+    elif emo == "Joy":
+        return 5
+    elif emo == "Sadness":
+        return 6
+
+    #ESPAÑOL
+    elif emo == "No Fear":
+        return 0.0
+    elif emo == "Low Fear":
+        return 0.33
+    elif emo == "Medium Fear":
+        return 0.66
+    elif emo == "High Fear":
+        return 1
+    else: 
+        return 0
+
+def setup_arduino():
+    arduino_com=variables['test_parms']['arduino_com']
+    arduino = Serial(port='COM' + arduino_com, baudrate=115200, timeout=.1)
+    print(f"Arduino connected on COM{arduino_com}.")
+    
+    def write_read(x, y, z):
+        arduino.write(bytes(str(x), 'utf-8'))
+        time.sleep(0.05)
+        arduino.write(bytes(str(y), 'utf-8'))
+        time.sleep(0.05)
+        arduino.write(bytes(str(z), 'utf-8'))
+        time.sleep(0.05)
+    
+    return arduino, write_read
+
+# Función para manejar datos sintéticos u reales (OpenBCI)
+def setup_board(is_synthetic):
+    params = BrainFlowInputParams()
+    
+    if is_synthetic:
+        board = BoardShim(BoardIds.SYNTHETIC_BOARD.value, params)
+        print("Using synthetic values...")
+    else:
+        open_bci_com=variables['test_parms']['open_bci_com']
+        params.serial_port = 'COM' + open_bci_com
+        board = BoardShim(BoardIds.CYTON_BOARD.value, params)
+        print(f"BCI connected on COM{open_bci_com}.")
+    
+    board.prepare_session()
+    timestamp_channel = board.get_timestamp_channel(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
+    acc_channel = board.get_accel_channels(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
+    
+    return board, timestamp_channel, acc_channel
+
+
+
 # 1. Sí Arduino, Sí Sintético
 if arduino_bol and synthetic_bol:
     print("Using both Arduino and Synthetic data.")
@@ -122,7 +226,7 @@ escalado_11 = lambda x: (x - 0.5)*2  ## CAMBIAR 0.5 POR VALOR NEUTRO DE ENGAGEME
 subject_ID, repetition_num = input('Please enter the subject ID and the number of repetition: ').split(' ')
 subject_ID = '0' + subject_ID if int(subject_ID) < 10 else subject_ID
 repetition_num = '0' + repetition_num if int(repetition_num) < 10 else repetition_num
-lodb = f"{base_path}/Data"
+lodb = base_path
 folder = f'S{subject_ID}R{repetition_num}_{datetime.datetime.now().strftime("%d%m%Y_%H%M")}'
 os.mkdir(f"{lodb}/{folder}")
 
@@ -143,7 +247,6 @@ def classify_fearm_metric(fear_metric):
     index = np.digitize(fear_metric, bins, right=True) - 1
     return labels[index]
 
-spherical_emotion = "Unknown"
 
 try:  
     while iteraciones < 2000:
@@ -362,7 +465,7 @@ try:
         #Definicion de cuales funciones se mandan a llamar en base al modelo linear o cubico
         
         if evaluation_type in ['cubic', 'both']:
-            cubic_emotion = emocion(final_descion,vale, arou, domi, emotions, emotions_fear)
+            cubic_emotion = emocion(vale, arou, domi, emotions, emotions_fear)
             print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
 
             if final_descion == 0:  # Solo emociones
@@ -370,7 +473,7 @@ try:
             elif final_descion == 1:  # Solo miedo
                 print(f"Cubic Fear: {cubic_emotion.replace('Fear', '').strip()}")
             elif final_descion == 2:  # Ambos
-                cubic_emotion = emocion(final_descion,vale_cubic, arou_cubic, domi_cubic, emotions, emotions_fear)
+                cubic_emotion = emocion(vale_cubic, arou_cubic, domi_cubic, emotions, emotions_fear)
                 emotion_value, fear_value = cubic_emotion
                 print(f"Cubic Emotion: {emotion_value}, Fear: {fear_value.replace('Fear', '').strip()}")
 
@@ -434,7 +537,7 @@ try:
                 ]
 
 
-        emociones = emocion(final_descion,arou, domi, vale,emotions,emotions_fear) #Aqui no se 
+        emociones = emocion(arou, domi, vale,emotions,emotions_fear) #Aqui no se 
         realemotion = real_emotion(spherical_emotion)  # ID categórico de la emoción
 
         def send_scaled_metric(client, address, metric):
@@ -458,12 +561,9 @@ try:
 
         client5.send_message(address_emotion, spherical_emotion)
         client5.send_message(address_emotion_id, realemotion)
-            
 
-        #Creo que address emotion es el que manda el valor real-emotion
         if evaluation_type in ['spherical', 'both']:
             send_scaled_metric(client3, address_similarity, temp)
-        
         if final_descion in [1, 2]:
             send_scaled_metric(client3, address_similarity, fear_metric)
         
@@ -502,6 +602,9 @@ except KeyboardInterrupt:
     df_complete = pd.concat([df_time, df_eeg, df_acc], axis=1)
     df_complete = df_complete.reset_index(drop=True)
 
+  
+    
+ 
     # Definir rutas para los archivos
     complete_path = f"{folder}/Complete_Data.csv"
     cubic_path = f"{folder}/Cubic_Emotions.csv"
@@ -532,6 +635,55 @@ except KeyboardInterrupt:
 
     combined_table = pd.DataFrame()
 
+        # Evaluación cúbica
+    if evaluation_type in ['cubic', 'both'] and os.path.exists(cubic_path):
+        table_cubic = load_table(cubic_path)
+        if final_descion == 0:
+            combined_table = table_cubic
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_cubic], ignore_index=True)
+
+        # Evaluación esférica
+    if evaluation_type in ['spherical', 'both'] and os.path.exists(spherical_path):
+        table_spherical = load_table(spherical_path)
+        if final_descion == 1:
+            combined_table = table_spherical
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_spherical], ignore_index=True)
+
+    if evaluation_type in ['spherical', 'both'] and os.path.exists(fear_spherical_path):
+        table_fear = load_table(fear_spherical_path)
+        if final_descion == 1:
+            combined_table = table_fear
+        elif final_descion == 2:
+            combined_table = pd.concat([combined_table, table_fear], ignore_index=True)
+
+        # Mostrar últimas filas de las combinaciones
+    if not combined_table.empty:
+        print(f"Last rows of combined data:\n{combined_table.tail(20)}")
+
+        # Estilizar y guardar tabla como HTML
+        num_columns = ['Timestamp', 'Engagement', 'Valence', 'Arousal', 'Dominance']
+        styled_table = (
+            combined_table.style
+            .format({col: "{:.2f}" for col in num_columns if col in combined_table.columns})
+            .highlight_max(subset=['Engagement'], axis=0, color='pink')
+            .highlight_min(subset=['Engagement'], axis=0, color='blue')
+        )
+
+            # Guardar la tabla estilizada
+        with open(styled_table_path, 'w') as f:
+            f.write(styled_table.render())
+            print(f"Styled table saved to {styled_table_path}")
+    else:
+        print("No combined data available to display or save.")
+
+        # Mostrar datos almacenados
+        print(f'Emotions:\n{df_emotions}')
+        print(f'Fear:\n{df_fear}')
+
+    board.stop_stream()
+    board.release_session()
 
 except Exception as e:
     print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
@@ -539,4 +691,5 @@ except Exception as e:
 finally:
     # Detener la sesión de la placa
     print(Fore.GREEN + 'Data stored successfully.' + Style.RESET_ALL)
+
 
