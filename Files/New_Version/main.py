@@ -229,7 +229,7 @@ repetition_num = '0' + repetition_num if int(repetition_num) < 10 else repetitio
 lodb = base_path
 folder = f'S{subject_ID}R{repetition_num}_{datetime.datetime.now().strftime("%d%m%Y_%H%M")}'
 os.mkdir(f"{lodb}/{folder}")
-
+comd=f"{lodb}/{folder}"
 df_eeg = pd.DataFrame()
 df_time = pd.DataFrame()
 df_emotions = pd.DataFrame(data = [], columns=['Timestamp', 'Engagement', 'Emotion', 'Valence', 'Arousal', 'Dominance'])
@@ -606,15 +606,15 @@ except KeyboardInterrupt:
     
  
     # Definir rutas para los archivos
-    complete_path = f"{folder}/Complete_Data.csv"
-    cubic_path = f"{folder}/Cubic_Emotions.csv"
-    spherical_path = f"{folder}/Spherical_Emotions.csv"
-    fear_spherical_path = f"{folder}/Fear_Spherical.csv"
-    styled_table_path = f"{folder}/styled_table.html"
+    complete_path = f"{comd}/Complete_Data.csv"
+    cubic_path = f"{comd}/Cubic_Emotions.csv"
+    spherical_path = f"{comd}/Spherical_Emotions.csv"
+    fear_spherical_path = f"{comd}/Fear_Spherical.csv"
+    styled_table_path = f"{comd}/styled_table.html"
 
     # Guardar los datos completos
     df_complete.to_csv(complete_path, index=False)
-
+    
     if not df_cubic.empty:
         df_cubic.to_csv(cubic_path, index=False)
 
@@ -624,64 +624,6 @@ except KeyboardInterrupt:
     if not df_fear_spherical.empty:
         df_fear_spherical.to_csv(fear_spherical_path, index=False)
 
-  
-    def load_table(file_path, tail_rows=20):
-        if os.path.exists(file_path):
-            print(f"Loading file: {file_path}")
-            return pd.read_csv(file_path).tail(tail_rows)
-        else:
-            print(f"Error: File '{file_path}' not found.")
-            return pd.DataFrame()
-
-    combined_table = pd.DataFrame()
-
-        # Evaluación cúbica
-    if evaluation_type in ['cubic', 'both'] and os.path.exists(cubic_path):
-        table_cubic = load_table(cubic_path)
-        if final_descion == 0:
-            combined_table = table_cubic
-        elif final_descion == 2:
-            combined_table = pd.concat([combined_table, table_cubic], ignore_index=True)
-
-        # Evaluación esférica
-    if evaluation_type in ['spherical', 'both'] and os.path.exists(spherical_path):
-        table_spherical = load_table(spherical_path)
-        if final_descion == 1:
-            combined_table = table_spherical
-        elif final_descion == 2:
-            combined_table = pd.concat([combined_table, table_spherical], ignore_index=True)
-
-    if evaluation_type in ['spherical', 'both'] and os.path.exists(fear_spherical_path):
-        table_fear = load_table(fear_spherical_path)
-        if final_descion == 1:
-            combined_table = table_fear
-        elif final_descion == 2:
-            combined_table = pd.concat([combined_table, table_fear], ignore_index=True)
-
-        # Mostrar últimas filas de las combinaciones
-    if not combined_table.empty:
-        print(f"Last rows of combined data:\n{combined_table.tail(20)}")
-
-        # Estilizar y guardar tabla como HTML
-        num_columns = ['Timestamp', 'Engagement', 'Valence', 'Arousal', 'Dominance']
-        styled_table = (
-            combined_table.style
-            .format({col: "{:.2f}" for col in num_columns if col in combined_table.columns})
-            .highlight_max(subset=['Engagement'], axis=0, color='pink')
-            .highlight_min(subset=['Engagement'], axis=0, color='blue')
-        )
-
-            # Guardar la tabla estilizada
-        with open(styled_table_path, 'w') as f:
-            f.write(styled_table.render())
-            print(f"Styled table saved to {styled_table_path}")
-    else:
-        print("No combined data available to display or save.")
-
-        # Mostrar datos almacenados
-        print(f'Emotions:\n{df_emotions}')
-        print(f'Fear:\n{df_fear}')
-
     board.stop_stream()
     board.release_session()
 
@@ -689,7 +631,6 @@ except Exception as e:
     print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
 
 finally:
-    # Detener la sesión de la placa
     print(Fore.GREEN + 'Data stored successfully.' + Style.RESET_ALL)
 
 
