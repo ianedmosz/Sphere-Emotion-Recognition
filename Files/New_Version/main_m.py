@@ -322,27 +322,23 @@ def compute_psd_parallel(column_data):
     return compute_psd_bands(column_data.values, fs=128)
 
 
-def predict_model(args):
-    """Ejecuta un modelo específico en paralelo."""
+def predict_model_wrapper(args):
+    """Envuelve la predicción para manejar excepciones y retornar resultados estructurados."""
     model_type, df_pred = args
     try:
         if model_type == "linear":
             val = mean(Val_Pkl_linear.predict(df_pred))
             aro = mean(Aro_Pkl_linear.predict(df_pred))
             dom = mean(Dom_Pkl_linear.predict(df_pred))
-            return (model_type, val, aro, dom)
-        
+            return {"type": "linear", "val": val, "aro": aro, "dom": dom}
         elif model_type == "cubic":
             val = mean(Val_Pkl_cubic.predict(df_pred))
             aro = mean(Aro_Pkl_cubic.predict(df_pred))
             dom = mean(Dom_Pkl_cubic.predict(df_pred))
-            return (model_type, val, aro, dom)
-        
+            return {"type": "cubic", "val": val, "aro": aro, "dom": dom}
     except Exception as e:
-        print(f"Error en {model_type}: {e}")
-        return (model_type, 0, 0, 0)
-
-
+        print(f"Error en {model_type}: {str(e)}")
+        return {"type": model_type, "val": 0, "aro": 0, "dom": 0}
 
 if __name__ == "__main__":
     try:
@@ -517,29 +513,33 @@ if __name__ == "__main__":
             if evaluation_type in ["spherical", "both"]:
                 tasks.append(("linear", df_pred))
 
-            # Ejecutar modelos en paralelo
+            # Ejecutar en paralelo
             with mp.Pool(processes=len(tasks)) as pool:
-                results = pool.map(predict_model, tasks)
+                results = pool.map(predict_model_wrapper, tasks)
 
             # Procesar resultados
-            cubic_pred = next((r for r in results if r[0] == "cubic"), None)
-            linear_pred = next((r for r in results if r[0] == "linear"), None)
+            cubic_result = next((r for r in results if r["type"] == "cubic"), None)
+            linear_result = next((r for r in results if r["type"] == "linear"), None)
 
-            if evaluation_type == "both" and cubic_pred and linear_pred:
-                vale_cubic, arou_cubic, domi_cubic = cubic_pred[1], cubic_pred[2], cubic_pred[3]
-                vale_linear, arou_linear, domi_linear = linear_pred[1], linear_pred[2], linear_pred[3]
-                vale, arou, domi = vale_linear, arou_linear, domi_linear  # O la lógica de mezcla que necesites
-                
-                print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
-                print(f"Linear V{vale_linear:.2f}, A{arou_linear:.2f}, D{domi_linear:.2f}")
-                
-            elif cubic_pred:
-                vale, arou, domi = cubic_pred[1], cubic_pred[2], cubic_pred[3]
-                print(f"Cubic V{vale:.2f}, A{arou:.2f}, D{domi:.2f}")
-                
-            elif linear_pred:
-                vale, arou, domi = linear_pred[1], linear_pred[2], linear_pred[3]
-                print(f"Linear V{vale:.2f}, A{arou:.2f}, D{domi:.2f}")
+            # Lógica de combinación
+            if evaluation_type == "both":
+                if cubic_result and linear_result:
+                    vale_cubic = cubic_result["val"]
+                    arou_cubic = cubic_result["aro"]
+                    domi_cubic = cubic_result["dom"]
+                    
+                    vale_linear = linear_result["val"]
+                    arou_linear = linear_result["aro"]
+                    domi_linear = linear_result["dom"]
+                    
+                    vale, arou, domi = vale_linear, arou_linear, domi_linear  # Usar lógica deseada
+                    print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
+                    print(f"Linear V{vale_linear:.2f}, A{arou_linear:.2f}, D{domi_linear:.2f}")
+            else:
+                if cubic_result:
+                    vale, arou, domi = cubic_result["val"], cubic_result["aro"], cubic_result["dom"]
+                elif linear_result:
+                    vale, arou, domi = linear_result["val"], linear_result["aro"], linear_result["dom"]
 
             engag_fp1 = mean(df_pred["Fp1_Engagement"])
             engag_fp2 = mean(df_pred["Fp2_Engagement"])
