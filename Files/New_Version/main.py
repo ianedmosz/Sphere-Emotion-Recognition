@@ -1,4 +1,4 @@
-mport pandas as pd
+import pandas as pd
 from brainflow import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 import time
 from scipy import signal
