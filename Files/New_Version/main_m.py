@@ -37,7 +37,8 @@ base_path = Path(__file__).parent
 # final_descion=int(input('0 for only emotions; 1 for only fear; 2 for both:'))
 
 emotions, emotions_fear, Descartes_Passions = load_emotions()
-
+num_cores = mp.cpu_count() 
+usable_cores = num_cores - 2
 # emotions_imp=load_emotions()
 
 (
@@ -392,7 +393,7 @@ if __name__ == "__main__":
             df5 = df4.iloc[:: int(1 / ratio)].interpolate()
 
             # **FILTRADO EN PARALELO**
-            with mp.Pool(processes=6) as pool:  # Ajusta el número de procesos según la CPU
+            with mp.Pool(processes=usable_cores) as pool:  # Ajusta el número de procesos según la CPU
                 filtered_columns = pool.map(filter_eeg, [df5[col] for col in df5.columns])
 
             # Reconstrucción del DataFrame
@@ -410,7 +411,7 @@ if __name__ == "__main__":
                 return compute_psd_bands(column_data.values, fs=128)
 
             # Use multiprocessing to compute PSD for each column in parallel
-            with mp.Pool(processes=6) as pool:  # Adjust the number of processes as needed
+            with mp.Pool(processes=usable_cores) as pool:  # Adjust the number of processes as needed
                 psd_results = pool.map(compute_psd_for_column, [df_average_reference[col] for col in df_average_reference.columns])
 
             # Combine the results into a DataFrame
