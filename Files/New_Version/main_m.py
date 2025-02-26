@@ -307,87 +307,97 @@ def classify_fearm_metric(fear_metric):
     return labels[index]
 
 
+def send_osc(client, address, value):
+    """Función para enviar datos OSC en paralelo."""
+    client.send_message(address, value)
+
+
+def predict_emotions(df_pred, evaluation_type):
+    """Realiza predicciones de emociones según el tipo de evaluación."""
+    vale, arou, domi = 0, 0, 0
+
+    if evaluation_type == "cubic":
+        valen_cubic = Val_Pkl_cubic.predict(df_pred)
+        arous_cubic = Aro_Pkl_cubic.predict(df_pred)
+        domin_cubic = Dom_Pkl_cubic.predict(df_pred)
+        vale, arou, domi = mean(valen_cubic), mean(arous_cubic), mean(domin_cubic)
+
+    elif evaluation_type == "spherical":
+        valen_linear = Val_Pkl_linear.predict(df_pred)
+        arous_linear = Aro_Pkl_linear.predict(df_pred)
+        domin_linear = Dom_Pkl_linear.predict(df_pred)
+        vale, arou, domi = mean(valen_linear), mean(arous_linear), mean(domin_linear)
+
+    elif evaluation_type == "both":
+        valen_cubic = Val_Pkl_cubic.predict(df_pred)
+        arous_cubic = Aro_Pkl_cubic.predict(df_pred)
+        domin_cubic = Dom_Pkl_cubic.predict(df_pred)
+
+        valen_linear = Val_Pkl_linear.predict(df_pred)
+        arous_linear = Aro_Pkl_linear.predict(df_pred)
+        domin_linear = Dom_Pkl_linear.predict(df_pred)
+
+        vale, arou, domi = mean(valen_linear), mean(arous_linear), mean(domin_linear)
+
+    return vale, arou, domi
+
+
+
+def filter_eeg(col_data):
+    return butter_bandpass_filter(col_data, lowcut=0.4, highcut=45, fs=128)
+
+def compute_psd_parallel(column_data):
+    """Calcula la densidad espectral de potencia (PSD) de un canal."""
+    return compute_psd_bands(column_data.values, fs=128)
+
 if __name__ == "__main__":
     try:
         while iteraciones < 2000:
             channel_data = [[] for _ in channels]
             channel_data_acc = [[] for _ in acc_channel]  # acceleration
 
-            # Start the streaming
             board.start_stream()
-
-            # Get the start time
             start_time = time.time()
-         # Loop until the specified duration is reached
+
             while time.time() - start_time < duration:
                 samples = board.get_current_board_data(sampling_rate)
 
-            # Append the samples to the corresponding channel's data list
             for i, channel in enumerate(channels):
                 channel_data[i].extend(samples[channel])
 
-            np_time = np.array(samples[timestamp_channel])
-            np_time = np_time - 21600  # time zone converter to GMT-6
-            np_df = pd.DataFrame(np_time)
-            df_time = df_time.append(np_df)
-            ## ACCELERATION ##
+            np_time = np.array(samples[timestamp_channel]) - 21600
+            df_time = df_time.append(pd.DataFrame(np_time))
 
             for i, channel in enumerate(acc_channel):
                 channel_data_acc[i].extend(samples[channel])
 
-            # Sleep for a small interval to avoid high CPU usage
-            time.sleep(1)
-
-            # Stop the streaming
             board.stop_stream()
 
-            # Stop the streaming
-
-            # acceleration dataframea
-            data_dict_acc = {
-                f"Channel_{channel}": channel_data_acc[i]
-                for i, channel in enumerate(acc_channel)
-            }
-            df_acc_prueba = pd.DataFrame(data_dict_acc)
-            df_acc = pd.concat([df_acc, df_acc_prueba], ignore_index=True)
-
-            # Create a dictionary with channel names as keys and data as values
-            data_dict = {
-            f"Channel_{channel}": channel_data[i] for i, channel in enumerate(channels)
-            }
-
-            # Create a DataFrame from the data dictionary
+            # Convertir los datos a DataFrame
+            data_dict = {f"Channel_{channel}": channel_data[i] for i, channel in enumerate(channels)}
             df = pd.DataFrame(data_dict)
 
             row_all_zeros = (df == 0).all(axis=1)
             df2 = df[~row_all_zeros]
             df3 = df2.drop(df.columns[0], axis=1)
             df4 = df3[
-                 [
-                "Channel_1",
-                "Channel_2",
-                "Channel_3",
-                "Channel_4",
-                "Channel_5",
-                "Channel_6",
-                "Channel_7",
-                "Channel_8",
-                ]
+                ["Channel_1", "Channel_2", "Channel_3", "Channel_4",
+                 "Channel_5", "Channel_6", "Channel_7", "Channel_8"]
             ].copy()
-            # Append data to global dataframe
+
             df_eeg = pd.concat([df_eeg, df4], ignore_index=True)
 
-            lowcut = 0.4  # Lower cutoff frequency in Hz
-            highcut = 45  # Upper cutoff frequency in Hz
-            fs = 128  # Sampling rate in Hz
-
+            # Interpolación
             ratio = 128 / 250
             df5 = df4.iloc[:: int(1 / ratio)].interpolate()
 
-            # Apply the bandpass filter to each column
-            filtered_df = df5.apply(
-                lambda col: butter_bandpass_filter(col, lowcut, highcut, fs)
-            )
+            # **FILTRADO EN PARALELO**
+            with mp.Pool(processes=6) as pool:  # Ajusta el número de procesos según la CPU
+                filtered_columns = pool.map(filter_eeg, [df5[col] for col in df5.columns])
+
+            # Reconstrucción del DataFrame
+            filtered_df = pd.DataFrame(filtered_columns).T
+
 
             average_reference = filtered_df.mean(axis=1)
             df_average_reference = filtered_df.sub(average_reference, axis=0)
@@ -395,12 +405,16 @@ if __name__ == "__main__":
             # Create an empty DataFrame to store the PSD results
             psd_df = pd.DataFrame()
 
-            # Iterate over each column in your DataFrame
-            for column in df_average_reference.columns:
-                # Compute the PSD for the column data and frequency bands
-                psd_bands = compute_psd_bands(df_average_reference[column].values, fs=128)
+            # Define a function to compute PSD for a single column
+            def compute_psd_for_column(column_data):
+                return compute_psd_bands(column_data.values, fs=128)
 
-                # Add the PSD values to the DataFrame
+            # Use multiprocessing to compute PSD for each column in parallel
+            with mp.Pool(processes=6) as pool:  # Adjust the number of processes as needed
+                psd_results = pool.map(compute_psd_for_column, [df_average_reference[col] for col in df_average_reference.columns])
+
+            # Combine the results into a DataFrame
+            for psd_bands in psd_results:
                 psd_df = pd.concat([psd_df, pd.DataFrame([psd_bands])], ignore_index=True)
 
             df_t = psd_df.transpose()
@@ -667,23 +681,28 @@ if __name__ == "__main__":
             def send_scaled_metric(client, address, metric):
                 scaled_metric = round(metric * 3 / 100, 2)
                 client.send_message(address, scaled_metric)
-
+            
+            processes = [
+                mp.Process(target=send_osc, args=(client1, address_engagement, engag)),
+                mp.Process(target=send_osc, args=(client2, address_engagement, engag)),
+                mp.Process(target=send_osc, args=(client3, address_emotion, spherical_emotion)),
+                mp.Process(target=send_osc, args=(client3, address_emotion_id, realemotion)),
+                mp.Process(target=send_osc, args=(client4, address_emotion, spherical_emotion)),
+                mp.Process(target=send_osc, args=(client4, address_emotion_id, realemotion)),
+                mp.Process(target=send_osc, args=(client5, address_emotion, spherical_emotion)),
+                mp.Process(target=send_osc, args=(client5, address_emotion_id, realemotion)),
+            ]
+            
+            for p in processes:
+                p.start()
+            
+            for p in processes:
+                p.join()
+            
             # write_read(vale, arou, domi)
             values = [vale, arou, domin]
             realemotion = real_emotion(emociones)
 
-            # Engagement (nivel de compromiso)
-            client1.send_message(address_engagement, engag)
-            client2.send_message(address_engagement, engag)
-
-            client3.send_message(address_emotion, spherical_emotion)
-            client3.send_message(address_emotion_id, realemotion)
-
-            client4.send_message(address_emotion, spherical_emotion)
-            client4.send_message(address_emotion_id, realemotion)
-
-            client5.send_message(address_emotion, spherical_emotion)
-            client5.send_message(address_emotion_id, realemotion)
 
             if evaluation_type in ["spherical", "both"]:
                 send_scaled_metric(client3, address_similarity, temp)
