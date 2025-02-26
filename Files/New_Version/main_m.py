@@ -732,9 +732,22 @@ if __name__ == "__main__":
             df_fear.style.format("{:.2f}")
             print("")
             # print(fear_cal)
+            try:
+                # Start the streaming
+                board.start_stream()
+                is_streaming = True
 
-            board.stop_stream()
-            board.release_session()
+                # Your existing code for processing data...
+
+                # Stop the streaming
+                try:
+                    board.stop_stream()
+                except Exception as e:
+                    print(Fore.RED + f"Error while stopping the stream: {e}" + Style.RESET_ALL)
+                is_streaming = False
+            except Exception as e:
+                print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
+            #board.release_session()
 
     except Exception as e:
         print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
