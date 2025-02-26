@@ -313,36 +313,6 @@ def send_osc(client, address, value):
     client.send_message(address, value)
 
 
-def predict_emotions(df_pred, evaluation_type):
-    """Realiza predicciones de emociones según el tipo de evaluación."""
-    vale, arou, domi = 0, 0, 0
-
-    if evaluation_type == "cubic":
-        valen_cubic = Val_Pkl_cubic.predict(df_pred)
-        arous_cubic = Aro_Pkl_cubic.predict(df_pred)
-        domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-        vale, arou, domi = mean(valen_cubic), mean(arous_cubic), mean(domin_cubic)
-
-    elif evaluation_type == "spherical":
-        valen_linear = Val_Pkl_linear.predict(df_pred)
-        arous_linear = Aro_Pkl_linear.predict(df_pred)
-        domin_linear = Dom_Pkl_linear.predict(df_pred)
-        vale, arou, domi = mean(valen_linear), mean(arous_linear), mean(domin_linear)
-
-    elif evaluation_type == "both":
-        valen_cubic = Val_Pkl_cubic.predict(df_pred)
-        arous_cubic = Aro_Pkl_cubic.predict(df_pred)
-        domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-
-        valen_linear = Val_Pkl_linear.predict(df_pred)
-        arous_linear = Aro_Pkl_linear.predict(df_pred)
-        domin_linear = Dom_Pkl_linear.predict(df_pred)
-
-        vale, arou, domi = mean(valen_linear), mean(arous_linear), mean(domin_linear)
-
-    return vale, arou, domi
-
-
 
 def filter_eeg(col_data):
     return butter_bandpass_filter(col_data, lowcut=0.4, highcut=45, fs=128)
@@ -350,6 +320,29 @@ def filter_eeg(col_data):
 def compute_psd_parallel(column_data):
     """Calcula la densidad espectral de potencia (PSD) de un canal."""
     return compute_psd_bands(column_data.values, fs=128)
+
+
+def predict_model(args):
+    """Ejecuta un modelo específico en paralelo."""
+    model_type, df_pred = args
+    try:
+        if model_type == "linear":
+            val = mean(Val_Pkl_linear.predict(df_pred))
+            aro = mean(Aro_Pkl_linear.predict(df_pred))
+            dom = mean(Dom_Pkl_linear.predict(df_pred))
+            return (model_type, val, aro, dom)
+        
+        elif model_type == "cubic":
+            val = mean(Val_Pkl_cubic.predict(df_pred))
+            aro = mean(Aro_Pkl_cubic.predict(df_pred))
+            dom = mean(Dom_Pkl_cubic.predict(df_pred))
+            return (model_type, val, aro, dom)
+        
+    except Exception as e:
+        print(f"Error en {model_type}: {e}")
+        return (model_type, 0, 0, 0)
+
+
 
 if __name__ == "__main__":
     try:
@@ -517,45 +510,36 @@ if __name__ == "__main__":
             vale, arou, domin, domi = 0, 0, 0, 0
             iteraciones += 1
 
-            if evaluation_type == "cubic":
-                valen_cubic = Val_Pkl_cubic.predict(df_pred)
-                arous_cubic = Aro_Pkl_cubic.predict(df_pred)
-                domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-                vale_cubic = mean(valen_cubic)
-                arou_cubic = mean(arous_cubic)
-                domi_cubic = mean(domin_cubic)
-                vale, arou, domi = vale_cubic, arou_cubic, domi_cubic
+            # Configurar tareas según evaluation_type
+            tasks = []
+            if evaluation_type in ["cubic", "both"]:
+                tasks.append(("cubic", df_pred))
+            if evaluation_type in ["spherical", "both"]:
+                tasks.append(("linear", df_pred))
 
-            elif evaluation_type == "spherical":
-                valen_linear = Val_Pkl_linear.predict(df_pred)
-                arous_linear = Aro_Pkl_linear.predict(df_pred)
-                domin_linear = Dom_Pkl_linear.predict(df_pred)
-                vale_linear = mean(valen_linear)
-                arou_linear = mean(arous_linear)
-                domi_linear = mean(domin_linear)
-                print(f"V{vale_linear:.2f}, A{arou_linear:.2f}, D{domi_linear:.2f}")
-                vale, arou, domi = vale_linear, arou_linear, domi_linear
+            # Ejecutar modelos en paralelo
+            with mp.Pool(processes=len(tasks)) as pool:
+                results = pool.map(predict_model, tasks)
 
-            # print(f"V{vale:.2f},A{arou:.2f},D{domi:.2f}")
+            # Procesar resultados
+            cubic_pred = next((r for r in results if r[0] == "cubic"), None)
+            linear_pred = next((r for r in results if r[0] == "linear"), None)
 
-            elif evaluation_type == "both":
-                # Predicciones cúbicas
-                valen_cubic = Val_Pkl_cubic.predict(df_pred)
-                arous_cubic = Aro_Pkl_cubic.predict(df_pred)
-                domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-                vale_cubic = mean(valen_cubic)
-                arou_cubic = mean(arous_cubic)
-                domi_cubic = mean(domin_cubic)
-
-                # Predicciones lineales
-                valen_linear = Val_Pkl_linear.predict(df_pred)
-                arous_linear = Aro_Pkl_linear.predict(df_pred)
-                domin_linear = Dom_Pkl_linear.predict(df_pred)
-                vale_linear = mean(valen_linear)
-                arou_linear = mean(arous_linear)
-                domi_linear = mean(domin_linear)
-
-                vale, arou, domi = vale_linear, arou_linear, domi_linear
+            if evaluation_type == "both" and cubic_pred and linear_pred:
+                vale_cubic, arou_cubic, domi_cubic = cubic_pred[1], cubic_pred[2], cubic_pred[3]
+                vale_linear, arou_linear, domi_linear = linear_pred[1], linear_pred[2], linear_pred[3]
+                vale, arou, domi = vale_linear, arou_linear, domi_linear  # O la lógica de mezcla que necesites
+                
+                print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
+                print(f"Linear V{vale_linear:.2f}, A{arou_linear:.2f}, D{domi_linear:.2f}")
+                
+            elif cubic_pred:
+                vale, arou, domi = cubic_pred[1], cubic_pred[2], cubic_pred[3]
+                print(f"Cubic V{vale:.2f}, A{arou:.2f}, D{domi:.2f}")
+                
+            elif linear_pred:
+                vale, arou, domi = linear_pred[1], linear_pred[2], linear_pred[3]
+                print(f"Linear V{vale:.2f}, A{arou:.2f}, D{domi:.2f}")
 
             engag_fp1 = mean(df_pred["Fp1_Engagement"])
             engag_fp2 = mean(df_pred["Fp2_Engagement"])
