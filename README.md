@@ -48,6 +48,6 @@ Project developed by the Neurohumanities Laboratory at the BRAIN Center, Tecnol�
 | **Dr. Carol S. Vélez-Saboyá**      | Assistant Research Professor          | [carol.velez@tec.mx](mailto:carol.velez@tec.mx) |
 | **Dr. Jorge de-J. Lozoya-Santos**  | Research Professor                    | [jorge.lozoya@tec.mx](mailto:jorge.lozoya@tec.mx) |
 | **Dr. Manuel Cebral-Loureda**      | Principal Investigator                | [manuel.cebral@tec.mx](mailto:manuel.cebral@tec.mx) |
-| **Dr. Mauricio A. Ramírez-Moreno** | Assistant Research Professor          | [mauricio.ramirez@tec.mx](mailto:mauricio.ramirezm@tec.mx) |
+| **Dr. Mauricio A. Ramírez-Moreno** | Assistant Research Professor          | [mauricio.ramirezm@tec.mx](mailto:mauricio.ramirezm@tec.mx) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
