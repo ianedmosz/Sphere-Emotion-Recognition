@@ -3,22 +3,22 @@
     "ports": {
         "port1": {
             "value": 9000,
-            "description": "Puerto para el servicio HTTP"
+            "description": "Engament touch designer"
         },
         "port2": {
             "value": 9001,
-            "description": "Puerto para la API"
+            "description": "Engament pure data"
         },
         "port3": {
-            "value": 9010,
-            "description": "Puerto para la base de datos"
+            "value": 7000,
+            "description": "Emocion touch deisgner"
         },
         "port4": {
-            "value": 9011,
-            "description": "Puerto para servicios adicionales"
+            "value": 7001,
+            "description": "Emocion pure data"
         },
         "port5": {
-            "value": 1337,
+            "value": 10000,
             "description": "Puerto personalizado para servicios específicos"
         }
     },
@@ -31,13 +31,13 @@
     },
     "test_parms": {
         "arduino_bol": false,
-        "synthetic_bol": true,
+        "synthetic_bol": false,
         "linear_bol": false,
         "final_descion": 0,
         "duration": 10,
         "sampling_rate": 250,
         "arduino_com": "COM5",
-        "open_bci_com": "COM5",
+        "open_bci_com": "3",
         "evaluation_type": "spherical"
     }
 }
