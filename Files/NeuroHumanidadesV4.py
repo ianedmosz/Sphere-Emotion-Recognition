@@ -707,11 +707,11 @@ try:
 
         client5.send_message(address_emotion, spherical_emotion)
         client5.send_message(address_emotion_id, realemotion)
-
+        
         if evaluation_type in ['spherical', 'both']:
-            send_scaled_metric(client3, address_similarity, temp)
+            send_scaled_metric(client5, address_similarity, temp)
         if final_descion in [1, 2]:
-            send_scaled_metric(client3, address_similarity, fear_metric)
+            send_scaled_metric(client5, address_similarity, fear_metric)
         
         
         if final_descion == 0:
