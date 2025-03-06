@@ -5,7 +5,7 @@ from scipy import signal
 import numpy as np
 from scipy.signal import welch, butter, lfilter
 import pickle
-import pyeeg as pe                         
+import pyeeg as pe
 from statistics import mean
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -72,7 +72,7 @@ ports=variables['ports'] #Puertos Definidos
 address=variables['address'] #Direcciones OSC
 
 
-port1 = ports['port1']['value'] 
+port1 = ports['port1']['value']
 port2 = ports['port2']['value']
 port5 = ports['port5']['value'] #arduino
 port3 = ports['port3']['value'] # TD miedo
@@ -128,13 +128,13 @@ def compute_psd_bands(data, fs):
         'Beta': (12, 30),
         'Gamma': (30, 45)
     }
-    
+
     # Compute the PSD for each frequency band
     psd_bands = {}
     for band, (f_min, f_max) in bands.items():
         power = pe.bin_power(data, [f_min, f_max], fs)
         psd_bands[band]=np.mean(power)
-    
+
     return psd_bands
 
 
@@ -155,17 +155,17 @@ with open(fear_path) as r:
 
 with open(Descartes_Passions_path) as d:
     Descartes_Passions=json.load(d)
-    
+
 
 
 def emocion(arousal, dominance, valence, emotions, emotions_fear):
     valence_1 = int(valence - 1)
     arousal_1 = int(arousal - 1)
     dominance_1 = int(dominance - 1)
-    
+
     # Create the key and ensure it's formatted as a string
     key = str([arousal_1, dominance_1, valence_1])
-    
+
     if final_descion == 0:  # Only emotions
         return emotions.get(key, 'Unknown')
     elif final_descion == 1:  # Only fear
@@ -193,7 +193,7 @@ def get_emotion_sphere(value):
     Input:
     - value (np.array): The input vector representing a detected value for emotion analysis.
         where
-        value[0]: valence [1,9], 
+        value[0]: valence [1,9],
         value[1]: dominance [1,9],
         value[2]: arousal [1,9]
 
@@ -211,14 +211,14 @@ def get_emotion_sphere(value):
 
     # Initialize a temporary variable to store the highest similarity score found.
     temp = 0
-    
+
     # Iterate over each emotion and its normalized vector in DP_NORM.
     for emotion, vec in DP_NORM.items():
-        
+
         # Calculate the cosine similarity between random_emotion and the current emotion vector.
         # Adding 1 and dividing by 2 scales the similarity from [-1, 1] to [0, 1].
         dot = (np.dot(random_emotion, vec) + 1) / 2
-        
+
         # Update temp and final_emotion if the current similarity score is the highest encountered.
         if dot > temp:
             temp, final_emotion = dot, emotion
@@ -231,24 +231,24 @@ def get_fear_sphere(value):
      # Define angles for rotation in radians
     theta = 2.356194490192345  # Rotation angle around the z-axis
     phi = -0.9553166181245093  # Rotation angle around the x-axis
-    
+
     r= np.array([
         [np.cos(theta) * np.cos(phi), -np.sin(theta) * np.cos(phi), np.sin(phi)],
         [np.sin(theta), np.cos(theta), 0],
         [-np.sin(phi) * np.cos(theta), np.sin(phi) * np.sin(theta), np.cos(phi)]
     ])
-   
+
 
     # Apply the rotation matrix to the mapped vector
     # Map or adjust the input value to [-1,1].
     n_vec = np.dot(r, map_value(value))
-    
+
     # Decompose the rotated vector into components
     valence, dominance, arousal = n_vec
 
     # Compute the polar angle phi (angle from the z-axis)
     phi = np.arctan2(np.sqrt(valence ** 2 + dominance ** 2), arousal)
-    
+
     # Compute the azimuthal angle theta (angle in the xy-plane)
     theta = np.arctan2(valence, dominance)
 
@@ -262,7 +262,7 @@ def real_emotion(emo):
                     "Rejected": None,
                     "Pessimistic": None,
                     "Hate": "Hate",
-                    "Distressed": None, 
+                    "Distressed": None,
                     "Anxious": None,
                     "Calm": None,
                     "Neutral": None,
@@ -274,7 +274,7 @@ def real_emotion(emo):
                     "Desire": "Desire",
                     "Love": "Love",
                     "Joy": "Joy",
-                    "Generosity": None 
+                    "Generosity": None
                     }
     #emo = map_emotions[emo]
     #Values for the OSC Server and Emotions
@@ -301,14 +301,14 @@ def real_emotion(emo):
         return 0.66
     elif emo == "High Fear":
         return 1
-    else: 
+    else:
         return 0
 
 def setup_arduino():
     arduino_com=variables['test_parms']['arduino_com']
     arduino = Serial(port='COM' + arduino_com, baudrate=115200, timeout=.1)
     print(f"Arduino connected on COM{arduino_com}.")
-    
+
     def write_read(x, y, z):
         arduino.write(bytes(str(x), 'utf-8'))
         time.sleep(0.05)
@@ -316,13 +316,13 @@ def setup_arduino():
         time.sleep(0.05)
         arduino.write(bytes(str(z), 'utf-8'))
         time.sleep(0.05)
-    
+
     return arduino, write_read
 
 # Función para manejar datos sintéticos u reales (OpenBCI)
 def setup_board(is_synthetic):
     params = BrainFlowInputParams()
-    
+
     if is_synthetic:
         board = BoardShim(BoardIds.SYNTHETIC_BOARD.value, params)
         print("Using synthetic values...")
@@ -331,11 +331,11 @@ def setup_board(is_synthetic):
         params.serial_port = 'COM' + open_bci_com
         board = BoardShim(BoardIds.CYTON_BOARD.value, params)
         print(f"BCI connected on COM{open_bci_com}.")
-    
+
     board.prepare_session()
     timestamp_channel = board.get_timestamp_channel(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
     acc_channel = board.get_accel_channels(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
-    
+
     return board, timestamp_channel, acc_channel
 
 
@@ -394,7 +394,7 @@ def classify_fearm_metric(fear_metric):
 profiler = cProfile.Profile()
 profiler.enable()
 
-try:  
+try:
     while iteraciones < 2000:
 
      # Create empty lists to store the streamed data for each channel
@@ -419,12 +419,12 @@ try:
             np_time = np_time - 21600 # time zone converter to GMT-6
             np_df = pd.DataFrame(np_time)
             df_time = df_time.append(np_df)
-            
+
             ## ACCELERATION ##
-            
+
             for i, channel in enumerate(acc_channel):
                 channel_data_acc[i].extend(samples[channel])
-                                
+
 
             # Sleep for a small interval to avoid high CPU usage
             time.sleep(1)
@@ -433,7 +433,7 @@ try:
         board.stop_stream()
 
         # Stop the streaming
-        
+
         # acceleration dataframea
         data_dict_acc = {f'Channel_{channel}': channel_data_acc[i] for i, channel in enumerate(acc_channel)}
         df_acc_prueba = pd.DataFrame(data_dict_acc)
@@ -450,10 +450,10 @@ try:
         df2 = df[~row_all_zeros]
         df3 = df2.drop(df.columns[0], axis=1)
         df4 = df3[['Channel_1', 'Channel_2', 'Channel_3', 'Channel_4', 'Channel_5', 'Channel_6', 'Channel_7', 'Channel_8']].copy()
-        
+
         # Append data to global dataframe
         df_eeg = pd.concat([df_eeg, df4], ignore_index=True)
-                
+
         lowcut = 0.4  # Lower cutoff frequency in Hz
         highcut = 45  # Upper cutoff frequency in Hz
         fs = 128  # Sampling rate in Hz
@@ -474,7 +474,7 @@ try:
         for column in df_average_reference.columns:
             # Compute the PSD for the column data and frequency bands
             psd_bands = compute_psd_bands(df_average_reference[column].values, fs=128)
-        
+
             # Add the PSD values to the DataFrame
             psd_df = pd.concat([psd_df, pd.DataFrame([psd_bands])], ignore_index=True)
 
@@ -513,7 +513,7 @@ try:
                              'P8_Delta', 'P8_Theta', 'P8_Alpha','P8_Beta','P8_Gamma',
                              'O1_Delta', 'O1_Theta', 'O1_Alpha','O1_Beta','O1_Gamma',
                              'O2_Delta', 'O2_Theta', 'O2_Alpha','O2_Beta','O2_Gamma',]
-        
+
         df_pred = df_modelo.reset_index(drop=True)
 
         CANALES = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
@@ -529,7 +529,7 @@ try:
 
         for channel in CANALES:
             df_pred[f'{channel}_Relaxation'] = df_pred[f'{channel}_Theta'] / df_pred[f'{channel}_Delta']
-        
+
         vale, arou, domin, domi = 0, 0, 0, 0
         iteraciones += 1
 
@@ -537,22 +537,22 @@ try:
             valen_cubic = Val_Pkl_cubic.predict(df_pred)
             arous_cubic = Aro_Pkl_cubic.predict(df_pred)
             domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-            vale_cubic = mean(valen_cubic) 
-            arou_cubic = mean(arous_cubic) 
-            domi_cubic = mean(domin_cubic) 
+            vale_cubic = mean(valen_cubic)
+            arou_cubic = mean(arous_cubic)
+            domi_cubic = mean(domin_cubic)
             vale, arou, domi = vale_cubic, arou_cubic, domi_cubic
-            
+
 
         elif evaluation_type == 'spherical':
             valen_linear = Val_Pkl_linear.predict(df_pred)
             arous_linear = Aro_Pkl_linear.predict(df_pred)
             domin_linear = Dom_Pkl_linear.predict(df_pred)
-            vale_linear = mean(valen_linear) 
-            arou_linear = mean(arous_linear) 
-            domi_linear = mean(domin_linear) 
+            vale_linear = mean(valen_linear)
+            arou_linear = mean(arous_linear)
+            domi_linear = mean(domin_linear)
             print(f"V{vale_linear:.2f}, A{arou_linear:.2f}, D{domi_linear:.2f}")
             vale, arou, domi = vale_linear, arou_linear, domi_linear
-            
+
 
            # print(f"V{vale:.2f},A{arou:.2f},D{domi:.2f}")
 
@@ -561,22 +561,22 @@ try:
             valen_cubic = Val_Pkl_cubic.predict(df_pred)
             arous_cubic = Aro_Pkl_cubic.predict(df_pred)
             domin_cubic = Dom_Pkl_cubic.predict(df_pred)
-            vale_cubic = mean(valen_cubic) 
-            arou_cubic = mean(arous_cubic) 
-            domi_cubic = mean(domin_cubic) 
+            vale_cubic = mean(valen_cubic)
+            arou_cubic = mean(arous_cubic)
+            domi_cubic = mean(domin_cubic)
 
              # Predicciones lineales
             valen_linear = Val_Pkl_linear.predict(df_pred)
             arous_linear = Aro_Pkl_linear.predict(df_pred)
             domin_linear = Dom_Pkl_linear.predict(df_pred)
-            vale_linear = mean(valen_linear) 
-            arou_linear = mean(arous_linear) 
-            domi_linear = mean(domin_linear) 
+            vale_linear = mean(valen_linear)
+            arou_linear = mean(arous_linear)
+            domi_linear = mean(domin_linear)
 
             vale, arou, domi = vale_linear, arou_linear, domi_linear
-            
-                 
-        
+
+
+
         engag_fp1 = mean(df_pred["Fp1_Engagement"])
         engag_fp2 = mean(df_pred["Fp2_Engagement"])
         engag_c3 = mean(df_pred["C3_Engagement"])
@@ -596,7 +596,7 @@ try:
         ##engagement = ((engag_fp1+engag_fp2+engag_c3+engag_c4+engag_p7+engag_p8+engag_o1+engag_o2)/8)
         engagement = ((engag_fp1+engag_fp2)/2)
         engag = escalado_11(engagement)
-        
+
         #engag = math.log((engag_fp1+engag_fp2)/2) #se agregó el logaritmo
         #engag = engag/2                           #se divide sobre 2 (rangos aprox de -2 a 2), con los IF, se limita a -1 y 1
         #if engag <= 0:
@@ -605,11 +605,11 @@ try:
         #    engag = 1
 
         ## LINEAS ANTERIORES -  CAMBIARON EL 25 DE AGOSTO DE 2023 ##
-        #engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación 
+        #engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación
         #engag = escalado_11(engag)
-        
+
         #Definicion de cuales funciones se mandan a llamar en base al modelo linear o cubico
-        
+
         if evaluation_type in ['cubic', 'both']:
             cubic_emotion = emocion(vale, arou, domi, emotions, emotions_fear)
             print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
@@ -679,11 +679,11 @@ try:
                     spherical_emotion,    # Emoción esférica
                     temp,                 # Similitud con la emoción
                     sphere_vector.tolist() if sphere_vector is not None else None, # Vector esférico normalizado
-                    vale, arou, domi  
+                    vale, arou, domi
                 ]
 
 
-        emociones = emocion(arou, domi, vale,emotions,emotions_fear) #Aqui no se 
+        emociones = emocion(arou, domi, vale,emotions,emotions_fear) #Aqui no se
         realemotion = real_emotion(spherical_emotion)  # ID categórico de la emoción
 
         def send_scaled_metric(client, address, metric):
@@ -693,7 +693,6 @@ try:
 
         #write_read(vale, arou, domi)
         values = [vale, arou, domin]
-        realemotion = real_emotion(emociones)
 
         # Engagement (nivel de compromiso)
         client1.send_message(address_engagement, engag)
@@ -707,13 +706,13 @@ try:
 
         client5.send_message(address_emotion, spherical_emotion)
         client5.send_message(address_emotion_id, realemotion)
-        
+
         if evaluation_type in ['spherical', 'both']:
             send_scaled_metric(client5, address_similarity, temp)
         if final_descion in [1, 2]:
             send_scaled_metric(client5, address_similarity, fear_metric)
-        
-        
+
+
         if final_descion == 0:
             df_emotions.loc[len(df_emotions)] = [time.time() - 21600, engag, emociones, vale, arou, domi]
         elif final_descion == 1:
@@ -722,10 +721,10 @@ try:
             df_emotions.loc[len(df_emotions)] = [time.time() - 21600, engag, emociones[0], vale, arou, domi]
             df_fear.loc[len(df_fear)] = [time.time() - 21600, engag, emociones[1], vale, arou, domi]
 
-        df_emotions.style.format("{:.2f}")   
+        df_emotions.style.format("{:.2f}")
         #print(emociones) #descomentar
-        print(f"Engagement:{engag*100:.2f}%") #descomentar 
-        df_fear.style.format("{:.2f}")  
+        print(f"Engagement:{engag*100:.2f}%") #descomentar
+        df_fear.style.format("{:.2f}")
         print("")
         # print(fear_cal)
 
@@ -748,9 +747,9 @@ except KeyboardInterrupt:
     df_complete = pd.concat([df_time, df_eeg, df_acc], axis=1)
     df_complete = df_complete.reset_index(drop=True)
 
-  
-    
- 
+
+
+
     # Definir rutas para los archivos
     complete_path = f"{folder}/Complete_Data.csv"
     cubic_path = f"{folder}/Cubic_Emotions.csv"
@@ -766,11 +765,11 @@ except KeyboardInterrupt:
 
     if not df_spherical.empty:
         df_spherical.to_csv(spherical_path, index=False)
-    
+
     if not df_fear_spherical.empty:
         df_fear_spherical.to_csv(fear_spherical_path, index=False)
 
-  
+
     def load_table(file_path, tail_rows=20):
         if os.path.exists(file_path):
             print(f"Loading file: {file_path}")

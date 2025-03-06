@@ -5,7 +5,7 @@ from scipy import signal
 import numpy as np
 from scipy.signal import welch, butter, lfilter
 import pickle
-import pyeeg as pe                          
+import pyeeg as pe
 from statistics import mean
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -38,7 +38,7 @@ warnings.filterwarnings("ignore", category=DataConversionWarning)
 
 
 ip = "192.168.0.158"  # IP address of the receiving device
-port1 = 9000 
+port1 = 9000
 port2 = 9001
 port5 = 1337 #arduino
 
@@ -76,7 +76,7 @@ fear_path=base_path/"Emotions"/"fear.json"
 
 # Preguntar si el usuario quiere usar Arduino
 arduino_1 = input("Do you want to use Arduino? (y/n): ").lower()
-arduino_bol = arduino_1 == 'y'  
+arduino_bol = arduino_1 == 'y'
 
 # Preguntar si el usuario quiere usar valores sintéticos
 synthetic_bol = input("Do you want to use synthetic values? (yes/no): ").lower() == 'y'
@@ -94,13 +94,13 @@ def compute_psd_bands(data, fs):
         'Beta': (12, 30),
         'Gamma': (30, 45)
     }
-    
+
     # Compute the PSD for each frequency band
     psd_bands = {}
     for band, (f_min, f_max) in bands.items():
         power = pe.bin_power(data, [f_min, f_max], fs)
         psd_bands[band]=np.mean(power)
-    
+
     return psd_bands
 
 
@@ -124,10 +124,10 @@ def emocion(arousal, dominance, valence, emotions, emotions_fear):
     valence_1 = int(valence - 1)
     arousal_1 = int(arousal - 1)
     dominance_1 = int(dominance - 1)
-    
+
     # Create the key and ensure it's formatted as a string
     key = str([arousal_1, dominance_1, valence_1])
-    
+
     if final_descion == 0:  # Only emotions
         return emotions.get(key, 'Unknown')
     elif final_descion == 1:  # Only fear
@@ -145,7 +145,7 @@ def real_emotion(emo):
                     "Rejected": None,
                     "Pessimistic": None,
                     "Hate": "Hate",
-                    "Distressed": None, 
+                    "Distressed": None,
                     "Anxious": None,
                     "Calm": None,
                     "Neutral": None,
@@ -157,10 +157,10 @@ def real_emotion(emo):
                     "Desire": "Desire",
                     "Love": "Love",
                     "Joy": "Joy",
-                    "Generosity": None 
+                    "Generosity": None
                     }
     #emo = map_emotions[emo]
-    
+
     if emo == "Love":
         return 1
     elif emo == "Hate":
@@ -183,7 +183,7 @@ def real_emotion(emo):
         return 0.66
     elif emo == "High Fear":
         return 1
-    else: 
+    else:
         return 0
 
 
@@ -191,7 +191,7 @@ def setup_arduino():
     arduino_com = input("What Number of COM is your Arduino: ")
     arduino = Serial(port='COM' + arduino_com, baudrate=115200, timeout=.1)
     print(f"Arduino connected on COM{arduino_com}.")
-    
+
     def write_read(x, y, z):
         arduino.write(bytes(str(x), 'utf-8'))
         time.sleep(0.05)
@@ -199,13 +199,13 @@ def setup_arduino():
         time.sleep(0.05)
         arduino.write(bytes(str(z), 'utf-8'))
         time.sleep(0.05)
-    
+
     return arduino, write_read
 
 # Función para manejar datos sintéticos u reales (OpenBCI)
 def setup_board(is_synthetic):
     params = BrainFlowInputParams()
-    
+
     if is_synthetic:
         board = BoardShim(BoardIds.SYNTHETIC_BOARD.value, params)
         print("Using synthetic values...")
@@ -214,11 +214,11 @@ def setup_board(is_synthetic):
         params.serial_port = 'COM' + open_bci_com
         board = BoardShim(BoardIds.CYTON_BOARD.value, params)
         print(f"BCI connected on COM{open_bci_com}.")
-    
+
     board.prepare_session()
     timestamp_channel = board.get_timestamp_channel(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
     acc_channel = board.get_accel_channels(BoardIds.CYTON_BOARD.value if not is_synthetic else BoardIds.SYNTHETIC_BOARD.value)
-    
+
     return board, timestamp_channel, acc_channel
 
 
@@ -265,7 +265,7 @@ df_fear=pd.DataFrame(data = [], columns=['Timestamp', 'Engagement', 'Emotion', '
 
 print(Fore.RED + 'Initializing functions...' + Style.RESET_ALL)
 
-try:   
+try:
     while iteraciones < 2000:
 
         # Create empty lists to store the streamed data for each channel
@@ -291,20 +291,20 @@ try:
             np_time = np_time - 21600 # time zone converter to GMT-6
             np_df = pd.DataFrame(np_time)
             df_time = pd.concat([df_time, np_df], ignore_index=True)
-            
-            
+
+
             ## ACCELERATION ##
-            
+
             for i, channel in enumerate(acc_channel):
                 channel_data_acc[i].extend(samples[channel])
-                                
+
 
             # Sleep for a small interval to avoid high CPU usage
             time.sleep(1)
 
         # Stop the streaming
         board.stop_stream()
-        
+
         # acceleration dataframe
         data_dict_acc = {f'Channel_{channel}': channel_data_acc[i] for i, channel in enumerate(acc_channel)}
         df_acc_prueba = pd.DataFrame(data_dict_acc)
@@ -321,11 +321,11 @@ try:
         df2 = df[~row_all_zeros]
         df3 = df2.drop(df.columns[0], axis=1)
         df4 = df3[['Channel_1', 'Channel_2', 'Channel_3', 'Channel_4', 'Channel_5', 'Channel_6', 'Channel_7', 'Channel_8']].copy()
-        
-        
+
+
         # Append data to global dataframe
         df_eeg = pd.concat([df_eeg, df4], ignore_index=True)
-                
+
         lowcut = 0.4  # Lower cutoff frequency in Hz
         highcut = 45  # Upper cutoff frequency in Hz
         fs = 128  # Sampling rate in Hz
@@ -346,7 +346,7 @@ try:
         for column in df_average_reference.columns:
             # Compute the PSD for the column data and frequency bands
             psd_bands = compute_psd_bands(df_average_reference[column].values, fs=128)
-        
+
             # Add the PSD values to the DataFrame
             psd_df = pd.concat([psd_df, pd.DataFrame([psd_bands])], ignore_index=True)
 
@@ -385,7 +385,7 @@ try:
                              'P8_Delta', 'P8_Theta', 'P8_Alpha','P8_Beta','P8_Gamma',
                              'O1_Delta', 'O1_Theta', 'O1_Alpha','O1_Beta','O1_Gamma',
                              'O2_Delta', 'O2_Theta', 'O2_Alpha','O2_Beta','O2_Gamma',]
-        
+
         df_pred = df_modelo.reset_index(drop=True)
 
         CANALES = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
@@ -410,7 +410,7 @@ try:
         valen = Val_Pkl.predict(df_pred)
         arous = Aro_Pkl.predict(df_pred)
         domin = Dom_Pkl.predict(df_pred)
-                 
+
         engag_fp1 = mean(df_pred["Fp1_Engagement"])
         engag_fp2 = mean(df_pred["Fp2_Engagement"])
         engag_c3 = mean(df_pred["C3_Engagement"])
@@ -425,7 +425,7 @@ try:
         ##engagement = ((engag_fp1+engag_fp2+engag_c3+engag_c4+engag_p7+engag_p8+engag_o1+engag_o2)/8)
         engagement = ((engag_fp1+engag_fp2)/2)
         engag = escalado_11(engagement)
-        
+
         #engag = math.log((engag_fp1+engag_fp2)/2) #se agregó el logaritmo
         #engag = engag/2                           #se divide sobre 2 (rangos aprox de -2 a 2), con los IF, se limita a -1 y 1
         #if engag <= 0:
@@ -434,9 +434,9 @@ try:
         #    engag = 1
 
         ## LINEAS ANTERIORES -  CAMBIARON EL 25 DE AGOSTO DE 2023 ##
-        #engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación 
+        #engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación
         #engag = escalado_11(engag)
-        
+
         vale = mean(valen)
         arou = mean(arous)
         domi = mean(domin)
@@ -476,36 +476,36 @@ try:
             df_fear.loc[len(df_fear)] = [time.time() - 21600, engag, emociones[1], vale, arou, domi]
 
 
-        df_emotions.style.format("{:.2f}")   
+        df_emotions.style.format("{:.2f}")
         print(emociones) #descomentar
-        print(engag) #descomentar 
-        df_fear.style.format("{:.2f}")  
+        print(engag) #descomentar
+        df_fear.style.format("{:.2f}")
         # print(fear_cal)
-        
+
 except KeyboardInterrupt:
-        
-    print(Fore.BLUE + 'Test interrupted. Storing data...' + Style.RESET_ALL)        
+
+    print(Fore.BLUE + 'Test interrupted. Storing data...' + Style.RESET_ALL)
 
     df_eeg = df_eeg.reset_index(drop=True)
-    df_time = df_time.reset_index(drop=True)  
+    df_time = df_time.reset_index(drop=True)
     df_time.columns = ['Timestamp']
     df_emotions = df_emotions.reset_index(drop=True)
-    df_fear=df_fear.reset_index(drop=True)  
-    
-    
-    df_acc = df_acc.reset_index(drop=True) 
-    df_acc.columns = ['Acc_1', 'Acc_2', 'Acc_3']     
-       
+    df_fear=df_fear.reset_index(drop=True)
+
+
+    df_acc = df_acc.reset_index(drop=True)
+    df_acc.columns = ['Acc_1', 'Acc_2', 'Acc_3']
+
     # acceleration
     #print(df_acc.shape)
-    #print(df_eeg.shape)  
- 
+    #print(df_eeg.shape)
+
     df_complete = pd.concat([df_time, df_eeg, df_acc], axis=1)
-    df_complete = df_complete.reset_index(drop=True)  
-      
+    df_complete = df_complete.reset_index(drop=True)
+
     #df_eeg.to_csv('{}/EEG.csv'.format(folder), mode='a')
-    #df_time.to_csv('{}/TimeStamps.csv'.format(folder), mode='a') 
-    
+    #df_time.to_csv('{}/TimeStamps.csv'.format(folder), mode='a')
+
     if final_descion == 0:
         path_1 = f'{lodb}/{folder}/S{subject_ID}R{repetition_num}_Emotions.csv'
         print(f'Guardando emociones en: {path_1}')
@@ -526,14 +526,14 @@ except KeyboardInterrupt:
     #df_acc.to_csv('{}/Acceleration.csv'.format(folder), mode='a') # acceleration
     print(f'Emotions{df_emotions}')
     print(f'Fear:{df_fear}')
-    
+
     #ldoa=input("directorio de tu carpeta de brain: ")
 
     #oped=pd.read_csv(path_1)
     #print(oped)
     board.stop_stream()
     board.release_session()
-    print(Fore.GREEN + 'Data stored.' + Style.RESET_ALL)   
+    print(Fore.GREEN + 'Data stored.' + Style.RESET_ALL)
     import pandas as pd
 
 if final_descion == 0 and path_1:
@@ -552,8 +552,8 @@ num_columns = ['Timestamp', 'Engagement', 'Valence', 'Arousal', 'Dominance']
 styled_table = (
     combined_table.style
     .format({col: "{:.2f}" for col in num_columns if col in combined_table.columns})  # Formatear solo columnas numéricas
-    .highlight_max(subset=['Engagement'], axis=0, color='pink')  
-    .highlight_min(subset=['Engagement'], axis=0, color='blue')  
+    .highlight_max(subset=['Engagement'], axis=0, color='pink')
+    .highlight_min(subset=['Engagement'], axis=0, color='blue')
 )
 
 
@@ -565,7 +565,7 @@ styled_table = (
     styled_table
     .set_table_styles([cell_hover, index_names, headers])
     .set_table_styles(
-        [{'selector': 'th', 'props': [('border', '1px solid black')]},  
+        [{'selector': 'th', 'props': [('border', '1px solid black')]},
          {'selector': 'td', 'props': [('border', '1px solid black')]}]
     )
 )
