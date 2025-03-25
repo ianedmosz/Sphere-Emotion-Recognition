@@ -2,17 +2,21 @@ import cv2
 import numpy as np
 import threading
 import queue
+from datetime import datetime
 
 class Detect:
     def __init__(self):
         self.emotion_colors = {
-            "Joy": (0, 255, 255),
-            "Sadness": (255, 0, 0),
-            "Hate": (0, 0, 255),
-            "Desire": (255, 255, 0),
-            "Admiration": (239, 184, 16),
-            "Love": (255, 0, 128),
+            # Manteniendo EXACTAMENTE los colores que tenías en tus comentarios
+            "Joy": (0, 255, 255),      # Amarillo (BGR)
+            "Sadness": (255, 0, 0),    # Azul
+            "Hate": (0, 0, 255),       # Rojo
+            "Desire": (255, 255, 0),   # Cian
+            "Admiration": (239, 184, 16), # Dorado
+            "Love": (255, 0, 128),     # Rosa
+            "Unknown": (128, 128, 128) # Gris por defecto
         }
+        
         self.command_queue = queue.Queue()
         self.window_thread = threading.Thread(target=self._window_loop)
         self.window_thread.daemon = True
@@ -20,16 +24,43 @@ class Detect:
 
     def _window_loop(self):
         cv2.namedWindow("Emocion Detectada", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Emocion Detectada", 640, 480)  # Manteniendo tu tamaño original
+        
         while True:
             try:
                 emotion = self.command_queue.get(timeout=0.1)
                 if emotion == "EXIT":
                     break
                     
+                # Crear la imagen de fondo
                 background = np.zeros((480, 640, 3), dtype=np.uint8)
-                background[:] = self.emotion_colors.get(emotion, (128, 128, 128))
-                cv2.putText(background, f"Emocion: {emotion}", (50, 50),
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                background[:] = self.emotion_colors.get(emotion, self.emotion_colors["Unknown"])
+                
+                # Configuración de texto mejorada
+                font = cv2.FONT_HERSHEY_DUPLEX  # Fuente más elegante
+                scale = 1.3  # Tamaño un poco más grande
+                thickness = 2
+                color = (255, 255, 255)  # Texto blanco por defecto
+                
+                # Ajustar color de texto para mejor contraste
+                if emotion in ["Joy", "Desire"]:
+                    color = (0, 0, 0)  # Texto negro para amarillo/cian
+                
+                # Calcular posición centrada
+                text = f"Emotion: {emotion}"
+                text_size = cv2.getTextSize(text, font, scale, thickness)[0]
+                text_x = (background.shape[1] - text_size[0]) // 2
+                text_y = (background.shape[0] + text_size[1]) // 2
+                
+                # Añadir sombra al texto para mejor legibilidad
+                cv2.putText(background, text, (text_x+2, text_y+2), 
+                           font, scale, (0, 0, 0), thickness+1, cv2.LINE_AA)
+                
+                # Texto principal
+                cv2.putText(background, text, (text_x, text_y), 
+                           font, scale, color, thickness, cv2.LINE_AA)
+                
+                # Mostrar la imagen
                 cv2.imshow("Emocion Detectada", background)
                 
             except queue.Empty:
