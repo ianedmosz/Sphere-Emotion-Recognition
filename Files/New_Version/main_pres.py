@@ -594,7 +594,7 @@ try:
 except KeyboardInterrupt:
     board.stop_stream()
     print(Fore.BLUE + 'Test interrupted. Storing data...' + Style.RESET_ALL)
-
+    emotion_display.close_window()
     # Resetear y renombrar DataFrames
     df_eeg = df_eeg.reset_index(drop=True)
     df_time = df_time.reset_index(drop=True)
