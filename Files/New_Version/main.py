@@ -465,6 +465,8 @@ try:
 
         if evaluation_type in ['cubic', 'both']:
             cubic_emotion = emocion(vale, arou, domi, emotions, emotions_fear)
+            spherical_emotion = None
+            fear_metric= 1
             print(f"Cubic V{vale_cubic:.2f}, A{arou_cubic:.2f}, D{domi_cubic:.2f}")
 
             if final_descion == 0:  # Solo emociones
@@ -547,7 +549,7 @@ try:
         #write_read(vale, arou, domi)
         values = [vale, arou, domin]
         realemotion = real_emotion(spherical_emotion)
-        print(f"Esto es realemotion:{realemotion}")
+        #print(f"Esto es realemotion:{realemotion}")
 
         # Engagement (nivel de compromiso)
         client1.send_message(address_engagement, engag)
@@ -563,9 +565,9 @@ try:
         client5.send_message(address_emotion_id, realemotion)
 
         if evaluation_type in ['spherical', 'both']:
-            send_scaled_metric(client3, address_similarity, temp)
+            send_scaled_metric(client5, address_similarity, temp)
         if final_descion in [1, 2]:
-            send_scaled_metric(client3, address_similarity, fear_metric)
+            send_scaled_metric(client5, address_similarity, fear_metric)
 
 
         if final_descion == 0:
