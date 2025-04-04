@@ -285,7 +285,6 @@ try:
         # Stop the streaming
         board.stop_stream()
 
-        # Stop the streaming
 
         # acceleration dataframea
         data_dict_acc = {f'Channel_{channel}': channel_data_acc[i] for i, channel in enumerate(acc_channel)}
